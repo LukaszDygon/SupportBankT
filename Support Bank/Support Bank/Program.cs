@@ -12,24 +12,31 @@ namespace Support_Bank
     
     class Program
     {
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         static void Main(string[] args)
         {
-            string csvFilename = @"C:\Users\LUD\Documents\Training\SupportBankT\Support Bank\Support Bank\resources\Transactions2014.csv";
-            var transactionList = ReadTransactionsCSV(csvFilename);
+            logger.Info("Starting the program.");
+            string csvFilename = @"C:\Users\LUD\Documents\Training\SupportBankT\Support Bank\Support Bank\resources\Transactions2015.csv";
+            var transactionList = ReadTransactionsFromCSV(csvFilename);
             var personalAccounts = GenerateAccountsFromTransactionList(transactionList);
 
             RunConsolePrompt(personalAccounts);
 
             
             Console.ReadKey();
+            logger.Info("Program Terminated");
         }
 
         private static void RunConsolePrompt(List<PersonalAccount> personalAccounts)
         {
+            logger.Info("Stariting the user input console.");
             while (true)
             {
                 Console.Write("> ");
                 string userinput = Console.ReadLine();
+                logger.Info($"New user request: {userinput}");
+
                 var userInputArray = userinput.Split(" "[0]);
                 
 
@@ -55,20 +62,36 @@ namespace Support_Bank
         }
         private static List<PersonalAccount> GenerateAccountsFromTransactionList(List<Transaction> transactionList)
         {
+            logger.Info("Generating User Accounts from the Transaction list.");
             var personalAccounts = new List<PersonalAccount>();
             foreach (var transaction in transactionList)
             {
                 AddTransactionToAccount(transaction, personalAccounts);
             }
+
+            logger.Info($"{personalAccounts.Count} User Accounts generated successfully.");
+
             return personalAccounts;
         }
 
-        private static List<Transaction> ReadTransactionsCSV(string fileName)
+        private static List<Transaction> ReadTransactionsFromCSV(string fileName)
         {
-            var csv = new CsvReader(File.OpenText(fileName));
-            var transactions = csv.GetRecords<Transaction>();
+            logger.Info($"Reading Transactions from the CSV file {fileName}");
+            try
+            {
+                var csv = InitializeCSVReader(fileName);
 
-            return transactions.ToList();
+                var transactions = csv.GetRecords<Transaction>();
+
+                logger.Info($"Transactions Read successfully.");
+
+                return transactions.ToList();
+            }
+            catch (Exception e)
+            {
+                logger.Error($"While attempting to read CSV: {e}");
+                throw (e);
+            }
         }
 
         private static void AddTransactionToAccount(Transaction transaction, List<PersonalAccount> personalAccounts)
@@ -104,13 +127,26 @@ namespace Support_Bank
             try
             {
                 var personalAccount = personalAccounts.Where(x => x.AccountName == accountName).ToArray()[0];
-                Console.WriteLine($"Owes {personalAccount.Owes().ToString()}");
-                Console.WriteLine($"Owed {personalAccount.Owed().ToString()}");
+                Console.WriteLine($"Owes {personalAccount.Owes().ToString("N2")}");
+                Console.WriteLine($"Owed {personalAccount.Owed().ToString("N2")}");
             }
             catch
             {
                 Console.WriteLine("No account with given name found.");
             }
+        }
+
+        private static CsvReader InitializeCSVReader(string fileName)
+        {
+            var csv = new CsvReader(File.OpenText(fileName));
+            csv.Configuration.IgnoreReadingExceptions = true;
+            csv.Configuration.ReadingExceptionCallback = (ex, row) =>
+            {
+
+                logger.Warn($"Could not format row {row.Row}: {row.Row}. Skipping.");
+            };
+
+            return csv;
         }
     }
 }

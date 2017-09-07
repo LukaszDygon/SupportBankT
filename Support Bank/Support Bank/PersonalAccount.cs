@@ -22,12 +22,12 @@ namespace Support_Bank
 
         public double Owed()
         {
-            return IncomingTransactionLog.Sum(x => x.Amount);
+            return Math.Truncate(IncomingTransactionLog.Sum(x => x.Amount) * 100) / 100;
         }
 
         public double Owes()
         {
-            return OutgoingTransactionLog.Sum(x => x.Amount);
+            return Math.Truncate(OutgoingTransactionLog.Sum(x => x.Amount) * 100) / 100;
         }
     }
 }
