@@ -16,22 +16,29 @@ namespace Support_Bank
         static void Main(string[] args)
         {
             logger.Info("Starting the program.");
-            string csv2015Filename = @"..\..\resources\Transactions2015.csv";
-            string csv2014Filename = @"..\..\resources\Transactions2014.csv";
-            string jsonFilename = @"..\..\resources\Transactions2013.json";
-            string xmlFilename = @"..\..\resources\Transactions2012.xml";
 
-            var transactionReader = new TransactionFileReader();
-            var transactionList = transactionReader.Read(jsonFilename);
-            transactionList.AddRange(transactionReader.Read(csv2014Filename));
-            transactionList.AddRange(transactionReader.Read(csv2015Filename));
-            transactionList.AddRange(transactionReader.Read(xmlFilename));
-            var personalAccounts = AccountGenerator.GenerateAccountsFromTransactionList(transactionList);
+            var directory = new DirectoryInfo(@"..\..\resources");
+            string[] transactionFileNames = directory.GetFiles().Select(x => x.FullName).ToArray();
 
-            TransactionCommandConsole.RunConsolePrompt(personalAccounts, transactionList);
+            var transactions = ReadAllTransactions(transactionFileNames);
+            var personalAccounts = AccountGenerator.GenerateAccountsFromTransactionList(transactions);
+
+            TransactionCommandConsole.RunConsolePrompt(personalAccounts, transactions);
 
             Console.ReadKey();
             logger.Info("Program Terminated");
+        }
+
+        public static List<Transaction> ReadAllTransactions(string[] transactionFileNames)
+        {
+            var transactionReader = new TransactionFileReader();
+            var transactions = new List<Transaction>();
+
+            foreach (var fileName in transactionFileNames)
+            {
+                transactions.AddRange(transactionReader.Read(fileName));
+            }
+            return transactions;
         }
     }
 }
