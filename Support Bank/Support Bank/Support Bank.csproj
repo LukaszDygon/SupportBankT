@@ -57,7 +57,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TransactionJSON.cs" />
+    <Compile Include="ITransactionFileReader.cs" />
+    <Compile Include="TransactionCsvFileReader.cs" />
+    <Compile Include="TransactionXmlFileReader.cs" />
+    <Compile Include="TransactionJsonFileReader.cs" />
+    <Compile Include="TransactionCommandConsole.cs" />
+    <Compile Include="AccountGenerator.cs" />
+    <Compile Include="TransactionFileReader.cs" />
+    <Compile Include="TransactionJson.cs" />
     <Compile Include="TransactionLog.cs" />
     <Compile Include="PersonalAccount.cs" />
     <Compile Include="Transaction.cs" />
