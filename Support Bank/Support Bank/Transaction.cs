@@ -4,17 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using Newtonsoft.Json;
 
 namespace Support_Bank
 {
-    class Transaction
+
+    public class Transaction
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
+        [JsonProperty("Date")]
         public DateTime Date { get; set; }
+
+        [JsonProperty("FromAccount")]
         public string From { get; set; }
+
+        [JsonProperty("ToAccount")]
         public string To { get; set; }
+
+        [JsonProperty("Narrative")]
         public string Narrative { get; set; }
+
+        [JsonProperty("Amount")]
         public double Amount { get; set; }
 
         public Transaction()

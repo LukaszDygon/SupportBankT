@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CsvHelper;
 using NLog;
+using Newtonsoft.Json;
+using System.Xml.Linq;
 
 namespace Support_Bank
 {
@@ -18,7 +20,12 @@ namespace Support_Bank
         {
             logger.Info("Starting the program.");
             string csvFilename = @"C:\Users\LUD\Documents\Training\SupportBankT\Support Bank\Support Bank\resources\Transactions2015.csv";
-            var transactionList = ReadTransactionsFromCSV(csvFilename);
+            string jsonFilename = @"C:\Users\LUD\Documents\Training\SupportBankT\Support Bank\Support Bank\resources\Transactions2013.json";
+            string xmlFilename = @"C:\Users\LUD\Documents\Training\SupportBankT\Support Bank\Support Bank\resources\Transactions2012.xml";
+
+            //var transactionList = ReadTransactionsFromJSON(jsonFilename);
+            //var transactionList = ReadTransactionsFromCSV(csvFilename);
+            var transactionList = ReadTransactionsFromXML(xmlFilename);
             var personalAccounts = GenerateAccountsFromTransactionList(transactionList);
 
             RunConsolePrompt(personalAccounts);
@@ -34,23 +41,23 @@ namespace Support_Bank
             while (true)
             {
                 Console.Write("> ");
-                string userinput = Console.ReadLine();
-                logger.Info($"New user request: {userinput}");
+                string userInput = Console.ReadLine();
+                logger.Info($"New user request: {userInput}");
 
-                var userInputArray = userinput.Split(" "[0]);
+                var userInputArray = userInput.Split(' ');
                 
 
                 if (userInputArray[0] == "List")
                 {
-                    string userName = string.Join(" ", userInputArray.Skip(1));
+                    string userNameOrAll = string.Join(" ", userInputArray.Skip(1));
 
-                    if (userName == "All")
+                    if (userNameOrAll == "All")
                     {
                         ShowAllAccountsInformation(personalAccounts);
                     }
                     else
                     {
-                        ShowSingleAccountInformation(userName, personalAccounts);
+                        ShowSingleAccountInformation(userNameOrAll, personalAccounts);
                     }
                 }
                 else
@@ -60,13 +67,15 @@ namespace Support_Bank
 
             }
         }
+
         private static List<PersonalAccount> GenerateAccountsFromTransactionList(List<Transaction> transactionList)
         {
             logger.Info("Generating User Accounts from the Transaction list.");
+
             var personalAccounts = new List<PersonalAccount>();
             foreach (var transaction in transactionList)
             {
-                AddTransactionToAccount(transaction, personalAccounts);
+                AddTransactionToRelevantAccounts(transaction, personalAccounts);
             }
 
             logger.Info($"{personalAccounts.Count} User Accounts generated successfully.");
@@ -80,7 +89,6 @@ namespace Support_Bank
             try
             {
                 var csv = InitializeCSVReader(fileName);
-
                 var transactions = csv.GetRecords<Transaction>();
 
                 logger.Info($"Transactions Read successfully.");
@@ -94,24 +102,72 @@ namespace Support_Bank
             }
         }
 
-        private static void AddTransactionToAccount(Transaction transaction, List<PersonalAccount> personalAccounts)
+        private static List<Transaction> ReadTransactionsFromJSON(string fileName)
         {
-            int outgoingAccountIndex = personalAccounts.FindIndex(p => p.AccountName == transaction.From);
-            int receivingAccountIndex = personalAccounts.FindIndex(p => p.AccountName == transaction.To);
-            if (outgoingAccountIndex < 0)
+            logger.Info($"Reading Transactions from the JSON file {fileName}");
+            try
             {
-                outgoingAccountIndex = personalAccounts.Count;
-                personalAccounts.Add(new PersonalAccount(transaction.From));
+                string jsonText = File.ReadAllText(fileName);
+                var transactions = JsonConvert.DeserializeObject<List<Transaction>>(jsonText);
+
+                logger.Info($"Transactions Read successfully.");
+
+                return transactions;
+            }
+            catch (Exception e)
+            {
+                logger.Error($"While attempting to read JSON: {e}");
+                throw (e);
+            }
+        }
+
+        private static List<Transaction> ReadTransactionsFromXML(string fileName)
+        {
+            XDocument document = XDocument.Load(fileName);
+            List<Transaction> transactions = new List<Transaction>();
+
+            foreach (XElement transactionXML in document.Element("TransactionList").Elements("SupportTransaction"))
+            {
+                transactions.Add(ConvertXmlNodeToTransaction(transactionXML));
+            }
+
+            return transactions;
+        }
+
+        private static Transaction ConvertXmlNodeToTransaction(XElement transactionXML)
+        {
+            DateTime date = DateTime.FromOADate(Double.Parse(transactionXML.Attribute("Date").Value));
+            string from = transactionXML.Element("Parties").Element("From").Value;
+            string to = transactionXML.Element("Parties").Element("To").Value;
+            string narrative = transactionXML.Element("Description").Value;
+            double amount = Double.Parse(transactionXML.Element("Value").Value);
+            var transaction = new Transaction(date, to, from, narrative, amount);
+
+            return transaction;
+        }
+
+        private static void AddTransactionToRelevantAccounts(Transaction transaction, List<PersonalAccount> personalAccounts)
+        {
+            //change to avoid using index
+            var outgoingAccount = personalAccounts.FirstOrDefault(p => p.AccountName == transaction.From);
+            var receivingAccount = personalAccounts.FirstOrDefault(p => p.AccountName == transaction.To);
+
+            if (outgoingAccount == null)
+            {
+                outgoingAccount = new PersonalAccount(transaction.From);
+                personalAccounts.Add(outgoingAccount);
                 
             }
-            if (receivingAccountIndex < 0)
+            if (receivingAccount == null)
             {
-                receivingAccountIndex = personalAccounts.Count;
-                personalAccounts.Add(new PersonalAccount(transaction.To));
+                receivingAccount = new PersonalAccount(transaction.To);
+                personalAccounts.Add(receivingAccount);
             }
-            personalAccounts[outgoingAccountIndex].OutgoingTransactionLog.Add(transaction);
-            personalAccounts[receivingAccountIndex].IncomingTransactionLog.Add(transaction);
+
+            receivingAccount.AddOutgoingTransaction(transaction);
+            outgoingAccount.AddIncomingTransaction(transaction);
         }
+
 
         private static void ShowAllAccountsInformation(List<PersonalAccount> personalAccounts)
         {
@@ -126,7 +182,7 @@ namespace Support_Bank
         {
             try
             {
-                var personalAccount = personalAccounts.Where(x => x.AccountName == accountName).ToArray()[0];
+                var personalAccount = personalAccounts.First(x => x.AccountName == accountName);
                 Console.WriteLine($"Owes {personalAccount.Owes().ToString("N2")}");
                 Console.WriteLine($"Owed {personalAccount.Owed().ToString("N2")}");
             }
@@ -138,15 +194,15 @@ namespace Support_Bank
 
         private static CsvReader InitializeCSVReader(string fileName)
         {
-            var csv = new CsvReader(File.OpenText(fileName));
-            csv.Configuration.IgnoreReadingExceptions = true;
-            csv.Configuration.ReadingExceptionCallback = (ex, row) =>
+            var csvReader = new CsvReader(File.OpenText(fileName));
+            csvReader.Configuration.IgnoreReadingExceptions = true;
+            csvReader.Configuration.ReadingExceptionCallback = (ex, row) =>
             {
 
-                logger.Warn($"Could not format row {row.Row}: {row.Row}. Skipping.");
+                logger.Warn($"Could not format row: {row.Row}. Skipping.");
             };
 
-            return csv;
+            return csvReader;
         }
     }
 }

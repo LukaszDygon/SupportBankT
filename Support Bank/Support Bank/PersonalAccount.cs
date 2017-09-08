@@ -9,8 +9,8 @@ namespace Support_Bank
     class PersonalAccount
     {
         public string AccountName { get; }
-        public List<Transaction> IncomingTransactionLog { get; set; }
-        public List<Transaction> OutgoingTransactionLog { get; set; }
+        public List<Transaction> IncomingTransactionLog { get; private set; }
+        public List<Transaction> OutgoingTransactionLog { get; private set; }
 
 
         public PersonalAccount(string accountName)
@@ -18,6 +18,16 @@ namespace Support_Bank
             AccountName = accountName;
             IncomingTransactionLog = new List<Transaction>();
             OutgoingTransactionLog = new List<Transaction>();
+        }
+
+        public void AddIncomingTransaction(Transaction transaction)
+        {
+            IncomingTransactionLog.Add(transaction);
+        }
+
+        public void AddOutgoingTransaction(Transaction transaction)
+        {
+            OutgoingTransactionLog.Add(transaction);
         }
 
         public double Owed()
