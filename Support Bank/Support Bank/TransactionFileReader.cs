@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-
 using CsvHelper;
 
 namespace Support_Bank
@@ -47,6 +46,7 @@ namespace Support_Bank
             else
             {
                 logger.Error($"File with invalid extension {extension} provided");
+
                 throw (new Exception($"File with invalid extension {extension} provided. Program supports only JSON, CSV and XML formats"));
             }
         }

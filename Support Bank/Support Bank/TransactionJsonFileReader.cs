@@ -25,6 +25,7 @@ namespace Support_Bank
             catch (Exception e)
             {
                 logger.Error($"While attempting to read JSON: {e}");
+
                 throw (e);
             }
         }

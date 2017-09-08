@@ -65,7 +65,6 @@
     <Compile Include="AccountGenerator.cs" />
     <Compile Include="TransactionFileReader.cs" />
     <Compile Include="TransactionJson.cs" />
-    <Compile Include="TransactionLog.cs" />
     <Compile Include="PersonalAccount.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="Program.cs" />

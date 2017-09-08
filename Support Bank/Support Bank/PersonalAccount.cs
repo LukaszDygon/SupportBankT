@@ -12,7 +12,6 @@ namespace Support_Bank
         public List<Transaction> IncomingTransactionLog { get; private set; }
         public List<Transaction> OutgoingTransactionLog { get; private set; }
 
-
         public PersonalAccount(string accountName)
         {
             AccountName = accountName;

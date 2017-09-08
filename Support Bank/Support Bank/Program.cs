@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 using CsvHelper;
 using NLog;
 
-
 namespace Support_Bank
 {
-    
     class Program
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();

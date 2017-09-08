@@ -13,7 +13,6 @@ namespace Support_Bank
 
         public static void RunConsolePrompt(List<PersonalAccount> personalAccounts)
         {
-
             logger.Info("Stariting the user input console.");
             while (true)
             {
