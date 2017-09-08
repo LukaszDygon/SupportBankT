@@ -17,8 +17,8 @@ namespace Support_Bank
         {
             try
             {
-                var csv = InitializeCSVReader(fileName);
-                var transactions = csv.GetRecords<Transaction>();
+                var csvReader = InitializeCSVReader(fileName);
+                var transactions = csvReader.GetRecords<Transaction>();
 
                 return transactions.ToList();
             }

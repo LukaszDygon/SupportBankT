@@ -8,11 +8,11 @@ using CsvHelper;
 
 namespace Support_Bank
 {
-    static class TransactionFileReader
+    class TransactionFileReader : ITransactionFileReader
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public static List<Transaction> Read(string fileName)
+        public List<Transaction> Read(string fileName)
         {
             string fileExtension = fileName.Split('.').Last();
 
@@ -26,7 +26,7 @@ namespace Support_Bank
             return transactions;
         }
 
-        private static ITransactionFileReader GetReaderForExtension(string extension)
+        private ITransactionFileReader GetReaderForExtension(string extension)
         {
             extension = extension.ToLower();
             var transactions = new List<Transaction>();

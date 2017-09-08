@@ -21,13 +21,14 @@ namespace Support_Bank
             string jsonFilename = @"..\..\resources\Transactions2013.json";
             string xmlFilename = @"..\..\resources\Transactions2012.xml";
 
-            var transactionList = TransactionFileReader.Read(jsonFilename);
-            transactionList.AddRange(TransactionFileReader.Read(csv2014Filename));
-            transactionList.AddRange(TransactionFileReader.Read(csv2015Filename));
-            transactionList.AddRange(TransactionFileReader.Read(xmlFilename));
+            var transactionReader = new TransactionFileReader();
+            var transactionList = transactionReader.Read(jsonFilename);
+            transactionList.AddRange(transactionReader.Read(csv2014Filename));
+            transactionList.AddRange(transactionReader.Read(csv2015Filename));
+            transactionList.AddRange(transactionReader.Read(xmlFilename));
             var personalAccounts = AccountGenerator.GenerateAccountsFromTransactionList(transactionList);
 
-            TransactionCommandConsole.RunConsolePrompt(personalAccounts);
+            TransactionCommandConsole.RunConsolePrompt(personalAccounts, transactionList);
 
             Console.ReadKey();
             logger.Info("Program Terminated");

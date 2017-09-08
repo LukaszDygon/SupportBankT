@@ -12,7 +12,7 @@ namespace Support_Bank
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public List<Transaction> Read(string fileName)
+        public List<Transaction>  Read(string fileName)
         {
             XDocument document = XDocument.Load(fileName);
             List<Transaction> transactions = new List<Transaction>();

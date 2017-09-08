@@ -11,7 +11,7 @@ namespace Support_Bank
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public static void RunConsolePrompt(List<PersonalAccount> personalAccounts)
+        public static void RunConsolePrompt(List<PersonalAccount> personalAccounts, List<Transaction> transactions)
         {
             logger.Info("Stariting the user input console.");
             while (true)
@@ -21,20 +21,22 @@ namespace Support_Bank
                 logger.Info($"New user request: {userInput}");
 
                 var userInputArray = userInput.Split(' ');
-
-
                 if (userInputArray[0] == "List")
                 {
-                    string userNameOrAll = string.Join(" ", userInputArray.Skip(1));    // format remainder of the command to a single name or "All" keyword 
-
-                    if (userNameOrAll == "All")
+                    string argument = string.Join(" ", userInputArray.Skip(1));    // format remainder of the command to a single name or "All" keyword 
+                    if (argument == "All")
                     {
                         ShowAllAccountsInformation(personalAccounts);
                     }
                     else
                     {
-                        ShowSingleAccountInformation(userNameOrAll, personalAccounts);
+                        ShowSingleAccountInformation(argument, personalAccounts);
                     }
+                }
+                else if($"{userInputArray[0]} {userInputArray[1]}" == "Export File")
+                {
+                    string argument = string.Join(" ", userInputArray.Skip(2));    // format remainder of the command to a single name or "All" keyword 
+                    WriteToFile(argument, transactions);
                 }
                 else
                 {
@@ -65,6 +67,12 @@ namespace Support_Bank
             {
                 Console.WriteLine("No account with given name found.");
             }
+        }
+
+        private static void WriteToFile(string fileName, List<Transaction> transactions)
+        {
+            var fileWriter = new TransactionFileWriter();
+            fileWriter.Write(fileName, transactions);
         }
     }
 }

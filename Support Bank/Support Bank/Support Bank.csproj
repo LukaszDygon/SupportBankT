@@ -57,8 +57,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TransactionFileWriter.cs" />
+    <Compile Include="TransactionCsvFileWriter.cs" />
+    <Compile Include="ITransactionFileWriter.cs" />
     <Compile Include="ITransactionFileReader.cs" />
     <Compile Include="TransactionCsvFileReader.cs" />
+    <Compile Include="TransactionJsonFileWriter.cs" />
     <Compile Include="TransactionXmlFileReader.cs" />
     <Compile Include="TransactionJsonFileReader.cs" />
     <Compile Include="TransactionCommandConsole.cs" />
@@ -69,6 +73,7 @@
     <Compile Include="Transaction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransactionXmlFileWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="resources\Transactions2012.xml" />
