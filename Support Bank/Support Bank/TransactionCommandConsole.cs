@@ -33,7 +33,12 @@ namespace Support_Bank
                         ShowSingleAccountInformation(argument, personalAccounts);
                     }
                 }
-                else if($"{userInputArray[0]} {userInputArray[1]}" == "Export File")
+                else if ($"{userInputArray[0]} {userInputArray[1]}" == "Import File")
+                {
+                    string argument = string.Join(" ", userInputArray.Skip(2));    // format remainder of the command to a single name or "All" keyword 
+                    ReadFromFile(argument, transactions, personalAccounts);
+                }
+                else if ($"{userInputArray[0]} {userInputArray[1]}" == "Export File")
                 {
                     string argument = string.Join(" ", userInputArray.Skip(2));    // format remainder of the command to a single name or "All" keyword 
                     WriteToFile(argument, transactions);
@@ -42,7 +47,6 @@ namespace Support_Bank
                 {
                     Console.WriteLine("Unrecognized command");
                 }
-
             }
         }
 
@@ -73,6 +77,13 @@ namespace Support_Bank
         {
             var fileWriter = new TransactionFileWriter();
             fileWriter.Write(fileName, transactions);
+        }
+
+        private static void ReadFromFile(string fileName, List<Transaction> transactions, List<PersonalAccount> accounts)
+        {
+            var newTransactions = new TransactionFileReader().Read(fileName);
+            AccountGenerator.GenerateAccountsFromTransactionList(newTransactions, accounts);
+            transactions.AddRange(newTransactions);
         }
     }
 }

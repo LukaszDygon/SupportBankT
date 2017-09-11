@@ -20,8 +20,8 @@ namespace Support_Bank
             var directory = new DirectoryInfo(@"..\..\resources");
             string[] transactionFileNames = directory.GetFiles().Select(x => x.FullName).ToArray();
 
-            var transactions = ReadAllTransactions(transactionFileNames);
-            var personalAccounts = AccountGenerator.GenerateAccountsFromTransactionList(transactions);
+            var transactions = new List<Transaction>();     // ReadAllTransactions(transactionFileNames);
+            var personalAccounts = new List<PersonalAccount>();     // AccountGenerator.GenerateAccountsFromTransactionList(transactions);
 
             TransactionCommandConsole.RunConsolePrompt(personalAccounts, transactions);
 
@@ -31,13 +31,9 @@ namespace Support_Bank
 
         public static List<Transaction> ReadAllTransactions(string[] transactionFileNames)
         {
-            var transactionReader = new TransactionFileReader();
-            var transactions = new List<Transaction>();
+            var transactionFileReader = new TransactionFileReader();
+            var transactions = transactionFileReader.ReadAllTransactions(transactionFileNames);
 
-            foreach (var fileName in transactionFileNames)
-            {
-                transactions.AddRange(transactionReader.Read(fileName));
-            }
             return transactions;
         }
     }

@@ -26,6 +26,17 @@ namespace Support_Bank
             return transactions;
         }
 
+        public List<Transaction> ReadAllTransactions(string[] transactionFileNames)
+        {
+            var transactions = new List<Transaction>();
+
+            foreach (var fileName in transactionFileNames)
+            {
+                transactions.AddRange(Read(fileName));
+            }
+            return transactions;
+        }
+
         private ITransactionFileReader GetReaderForExtension(string extension)
         {
             extension = extension.ToLower();

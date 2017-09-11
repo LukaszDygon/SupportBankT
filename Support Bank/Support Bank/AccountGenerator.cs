@@ -26,6 +26,20 @@ namespace Support_Bank
             return personalAccounts;
         }
 
+        public static List<PersonalAccount> GenerateAccountsFromTransactionList(List<Transaction> transactionList, List<PersonalAccount> personalAccounts)
+        {
+            logger.Info("Generating User Accounts from the Transaction list.");
+
+            foreach (var transaction in transactionList)
+            {
+                AddTransactionToRelevantAccounts(transaction, personalAccounts);
+            }
+
+            logger.Info($"{personalAccounts.Count} User Accounts generated successfully.");
+
+            return personalAccounts;
+        }
+
         private static void AddTransactionToRelevantAccounts(Transaction transaction, List<PersonalAccount> personalAccounts)
         {
             //change to avoid using index
